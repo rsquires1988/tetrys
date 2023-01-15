@@ -42,20 +42,25 @@ def main():
             # make block surface the same size as the block itself
             block_surface = pygame.Surface((side_len,side_len))
             
-            # give block a background color
-            # TODO: Make it a lighter shade of the border color
-            block_surface.fill((0,0,0))
+            desaturation_percent = 0.25
+            # give block a background color (Programmer's note: Next time, please, just hardcode them in)
+            desaturated_block_color = [64 if n == 0 else int(n - (n * desaturation_percent)) for n in block_color]
+            # desaturated_block_color = [min(int(n + (255 * desaturation_percent)), 255) if n < 128 
+            #                            else max(int(n - (n * desaturation_percent)), 0) for n in block_color]
+            # print(f'{desaturated_block_color}')
+            block_surface.fill(block_color)
             
             # make the block Rect, using the color passed in from a tetronimo function
             block_rect = pygame.Rect((0,0), (side_len, side_len))
-            pygame.draw.rect(block_surface, block_color, block_rect, width=2)
+            pygame.draw.rect(block_surface, desaturated_block_color, block_rect, width=3)
+            pygame.draw.rect(block_surface, (127,127,127), block_rect, width=1)
             
             return block_surface
         
         tetronimo_surfaces = []
         for tetronimo in tetronimos.values():
             tetronimo_surface = pygame.Surface(tetronimo["size"], pygame.SRCALPHA)
-            tetronimo_surface.fill((200,200,200,255))
+            # tetronimo_surface.fill((200,200,200,255))
             block_surface = create_block(tetronimo["color"])
 
             # draw the block Surface onto the tetronimo Surface
@@ -82,15 +87,11 @@ def main():
     pygame.display.set_caption("Tetris")
 
     # set the color of the background
-    bg_color = (100, 100, 100)
+    bg_color = (175, 175, 175)
     
     # create the tetronimos
     tetronimo_list = create_tetronimos()
-
-    
     old_tetronimos = []
-    
-
     
     # get the first tetronimo
     current_tetronimo = next_tetronimo(tetronimo_list)
@@ -155,154 +156,6 @@ def main():
         
     # close the window and quit pygame
     pygame.quit()
-
-        # DEBUG:
-        # frame_count = 0
-        # start_time = time.time()
-        
-        # DEBUG:
-        # frame_count += 1
-        # elapsed_time = time.time() - start_time
-        #
-        # if elapsed_time >= 1:
-        #     frame_rate = frame_count / elapsed_time
-        #     print(f"Frame rate: {frame_rate:.2f} fps")
-        #     frame_count = 0
-        #     start_time = time.time()
-        
-
-        # DEBUG: 
-        # if interval != 1000:
-        #     interval = 1000
-        #     pygame.time.set_timer(pygame.USEREVENT, interval)
-        
-        # DEBUG:
-        # screen.blit(create_right_l_tetronimo(), (40, 40))
-        # screen.blit(create_box_tetronimo(), (80, 40))
-        # screen.blit(create_left_s_tetronimo(), (120, 40))
-        # screen.blit(create_right_s_tetronimo(), (40, 120))
-        # screen.blit(create_straight_tetronimo(), (80, 120))
-        # screen.blit(create_left_l_tetronimo(), (120, 120))
-        # screen.blit(create_t_tetronimo(), (80, 200))
-        # move_rect = right_l_tetronimo.get_rect()
-    
-        # DEBUG:       
-        
-        # IN MAIN:
-        # right_l_tetronimo = create_right_l_tetronimo()
-        # box_tetronimo = create_box_tetronimo()
-        # left_l_tetronimo = create_left_l_tetronimo()
-        # right_s_tetronimo = create_right_s_tetronimo()
-        # straight_tetronimo = create_straight_tetronimo()
-        # left_s_tetronimo = create_left_s_tetronimo()
-        # t_tetronimo = create_t_tetronimo()
-        
-        # tetronimo_list = [right_l_tetronimo, box_tetronimo, left_l_tetronimo, right_s_tetronimo,
-        #                   straight_tetronimo, left_s_tetronimo, t_tetronimo]
-        
-        # # function to create a right facing "L" tetronimo
-        # def create_right_l_tetronimo(x=0,y=0):
-        #     block_color = (255, 0, 0)   # red
-            
-        #     # coordinates used to position the indivdual blocks to make the shape of the full tetronimo
-        #     block_positions = [(x,y), (x, y+side_len), (x, y+2*side_len), (x+side_len, y+2*side_len)]
-            
-        #     # make surface to combine all blocks into one asset, and give it a transparent background
-        #     tetronimo_surface = pygame.Surface((40, 60), pygame.SRCALPHA)
-        #     # tetronimo_surface.fill((200,200,200,255)) # DEBUG: shows rect of tetronimo surface when last int is non-zero
-            
-        #     # make each block in the tetronimo
-        #     for block_position in block_positions:
-        #         block_surface = create_block(block_color)
-                
-        #         # draw the block Surface onto the tetronimo Surface
-        #         tetronimo_surface.blit(block_surface, block_position)
-                
-        #     return tetronimo_surface
-            
-        # # function to create a box-shaped tetronimo
-        # def create_box_tetronimo(x=0,y=0):
-        #     block_color = (255, 255, 0) # yellow
-        #     block_positions = [(x,y), (x, y+side_len), (x+side_len, y+side_len), (x+side_len, y)]
-            
-        #     tetronimo_surface = pygame.Surface((40, 40), pygame.SRCALPHA)
-        #     # tetronimo_surface.fill((200,200,200,255))
-            
-        #     for block_position in block_positions:
-        #         block_surface = create_block(block_color)
-        #         tetronimo_surface.blit(block_surface, block_position)
-                
-        #     return tetronimo_surface
-        
-        # # function to create a left facing "S" tetronimo
-        # def create_left_s_tetronimo(x=0,y=0):
-        #     block_color = (0, 255, 0)   # green
-        #     block_positions = [(x+side_len,y), (x+side_len, y+side_len), (x, y+side_len), (x, y+2*side_len)]
-            
-        #     tetronimo_surface = pygame.Surface((40, 60), pygame.SRCALPHA)
-        #     # tetronimo_surface.fill((200,200,200,255))
-            
-        #     for block_position in block_positions:
-        #         block_surface = create_block(block_color)
-        #         tetronimo_surface.blit(block_surface, block_position)
-                
-        #     return tetronimo_surface
-            
-        # # function to create a right facing "S" tetronimo
-        # def create_right_s_tetronimo(x=0,y=0):
-        #     block_color = (0, 0, 255)   # blue
-        #     block_positions = [(x,y), (x, y+side_len), (x+side_len, y+side_len), (x+side_len, y+2*side_len)]
-            
-        #     tetronimo_surface = pygame.Surface((40, 60), pygame.SRCALPHA)
-        #     # tetronimo_surface.fill((200,200,200,255))
-            
-        #     for block_position in block_positions:
-        #         block_surface = create_block(block_color)
-        #         tetronimo_surface.blit(block_surface, block_position)
-                
-        #     return tetronimo_surface
-        
-        # # function to create a straight tetronimo
-        # def create_straight_tetronimo(x=0,y=0):
-        #     block_color = (0, 255, 255) # cyan
-        #     block_positions = [(x,y), (x, y+side_len), (x, y+2*side_len), (x, y+3*side_len)]
-            
-        #     tetronimo_surface = pygame.Surface((20, 80), pygame.SRCALPHA)
-        #     # tetronimo_surface.fill((200,200,200,255))
-            
-        #     for block_position in block_positions:
-        #         block_surface = create_block(block_color)
-        #         tetronimo_surface.blit(block_surface, block_position)
-                
-        #     return tetronimo_surface
-                
-        # # function to create a left facing "L" tetronimo
-        # def create_left_l_tetronimo(x=0,y=0):
-        #     block_color = (255, 0, 255) # violet
-        #     block_positions = [(x+side_len,y), (x+side_len, y+side_len), (x+side_len, y+2*side_len), (x, y+2*side_len)]
-            
-        #     tetronimo_surface = pygame.Surface((40, 60), pygame.SRCALPHA)
-        #     # tetronimo_surface.fill((200,200,200,255))
-            
-        #     for block_position in block_positions:
-        #         block_surface = create_block(block_color)
-        #         tetronimo_surface.blit(block_surface, block_position)
-                
-        #     return tetronimo_surface
-        
-        # # function to create a "T" tetronimo
-        # def create_t_tetronimo(x=0,y=0):
-        #     block_color = (255, 165, 0) # orange
-        #     block_positions = [(x+side_len,y), (x, y+side_len), (x+side_len, y+side_len), (x+2*side_len, y+side_len)]
-        
-        #     tetronimo_surface = pygame.Surface((60, 40), pygame.SRCALPHA)
-        #     # tetronimo_surface.fill((200,200,200,255))
-            
-        #     for block_position in block_positions:
-        #         block_surface = create_block(block_color)
-        #         tetronimo_surface.blit(block_surface, block_position)
-                
-        #     return tetronimo_surface
 
 if __name__ == "__main__":
     main()

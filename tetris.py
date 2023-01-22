@@ -1,22 +1,14 @@
 #!/usr/bin/env python3
 import pygame
-from tetronimo import Tetronimo
+from tetronimo import Tetronimo, placed_group#, TetSprite
 from typing import Dict, List
 
 def main():
     dim = 50
-    x= dim * 10
+    x=0
     y=0
     LEFT = 90
     RIGHT = -90
-
-    def rotation(name, tetronimo, direction):
-        if name == "box":
-            # TODO: should rotate the hitbox? I guess? Still not sure why I did this beyond "that's how they do it in the real tetris"
-            return tetronimo
-        else:
-            rotated_tet_surf = pygame.transform.rotate(tetronimo, direction)
-            return rotated_tet_surf
         
     # def collision(block_rects):
     #     for block_rect in block_rects:
@@ -49,9 +41,14 @@ def main():
     # tetronimo_dict = create_tetronimos()
     old_tetronimos = []
     
-    falling_tetronimo = Tetronimo(x, y, dim)
-    initial_rect = falling_tetronimo.surface.get_rect()
-    move_rect = initial_rect
+    # falling_tetronimo = 
+    falling_tet = Tetronimo(x,y,dim)
+    # falling_group.add(falling_tet)
+    # falling_tet = TetSprite(falling_tet, falling_tetronimo_sprite_group)
+
+    # falling_tetronimo_sprite_group.add(falling_tet)
+    # initial_rect = falling_tetronimo.surface.get_rect()
+    # move_rect = initial_rect
 
     # # get the first tetronimo
     # outline = current_mask.outline()
@@ -79,31 +76,34 @@ def main():
             if event.type == pygame.QUIT:
                 done = True
             elif event.type == pygame.USEREVENT:                                                # if the timer is at 0
-                move_rect.y += dim # move_rect.y += dim                                                           # move tetronimo down one dim
-                if move_rect.bottom > screen.get_height(): #current_mask.outline() not in screen:#.area():# current_mask.overlap(screen_bottom_mask, (0, screen.get_height() + 1)): #any in falling_tetronimo.mask.outline() not in screen: # any in current_mask.outline() > screen.get_height():      # if the tetronimo's bottom edge is lower than the play area
-                    move_rect.bottom = screen.get_height()                                      # move it back onto the play area
-                    stay_rect = move_rect                                                       # save the position it was in when it collided
-                    old_tetronimos.append((falling_tetronimo.surface, stay_rect))               # and add it to a list of placed tetronimos
-                    falling_tetronimo = Tetronimo(x,y,dim)                                             # get the next random tetronimo
-                    move_rect = falling_tetronimo.surface.get_rect()                            # and its bounding rectangle
+                falling_tet.move(0, dim) # move_rect.y += dim                                                           # move tetronimo down one dim
+                print(falling_tet)
+                if falling_tet.rect.bottom > screen.get_height(): #current_mask.outline() not in screen:#.area():# current_mask.overlap(screen_bottom_mask, (0, screen.get_height() + 1)): #any in falling_tetronimo.mask.outline() not in screen: # any in current_mask.outline() > screen.get_height():      # if the tetronimo's bottom edge is lower than the play area
+                    falling_tet.rect.bottom = screen.get_height()                                      # move it back onto the play area
+                    # stay_sprite = falling_tet                                                # save the position it was in when it collided
+                    falling_tet.update()
+                    # old_tetronimos.append((falling_tet.image, falling_tet.rect))
+                    falling_tet = Tetronimo(x,y,dim)# and add it to a list of placed tetronimos
+                    # falling_tet = TetSprite(falling_tet, falling_tetronimo_sprite_group)                                         # get the next random tetronimo
+                    # move_rect = falling_tetronimo.surface.get_rect()                            # and its bounding rectangle
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:                                                  # if left arrow is pressed down
-                    if move_rect.left <= 0:                                                     # don't let it leave the play area to the left
-                        move_rect.left = 0
+                    if falling_tet.rect.left <= 0:                                                     # don't let it leave the play area to the left
+                        falling_tet.rect.left = 0
                     else: 
-                        move_rect.x -= dim                                                      # otherwise, move it one block to the left
+                        falling_tet.move(-dim,0)                                              # otherwise, move it one block to the left
                 if event.key == pygame.K_RIGHT:                                                 # if right arrow is pressed down
-                    if move_rect.right >= screen.get_width():                                   # don't let it leave the play area to the right
-                        move_rect.right = screen.get_width()
+                    if falling_tet.rect.right >= screen.get_width():                                   # don't let it leave the play area to the right
+                        falling_tet.rect.right = screen.get_width()
                     else: 
-                        move_rect.x += dim                                                      # otherwise, move it one block to the right
+                        falling_tet.move(dim,0)                                              # otherwise, move it one block to the right
                 if event.key == pygame.K_DOWN:                                                  # if down arrow is pressed down
                     interval = interval // 10                                                   # decrease auto-drop timing interval by a factor of 10
                     pygame.time.set_timer(pygame.USEREVENT, interval)                           # and reset the timer
                 if event.key == pygame.K_d:
-                    falling_tetronimo.surface = rotation(falling_tetronimo.name, falling_tetronimo.surface, LEFT)
+                    falling_tet.rotation(LEFT)
                 if event.key == pygame.K_f:
-                    falling_tetronimo.surface = rotation(falling_tetronimo.name, falling_tetronimo.surface, RIGHT)
+                    falling_tet.rotation(RIGHT)
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_DOWN:                                                  # if down arrow is released
                     interval = base_interval                                                    # return "speed" to base value
@@ -116,12 +116,13 @@ def main():
         # ! DEBUG: Shows masks
         # outline = current_tetronimo["mask"].outline()
         # pygame.draw.polygon(falling_tetronimo.surface, (255,255,255), outline)
-        screen.blit(falling_tetronimo.surface, move_rect)
+        screen.blit(falling_tet.image, falling_tet.rect)
         # current_tetronimo["mask"].fill()
         # screen.blit(current_tetronimo["mask"].
         
-        for old_tetronimo, stay_rect in old_tetronimos:
-            screen.blit(old_tetronimo, stay_rect)
+        placed_group.draw(screen)
+        # for old_tetronimo, stay_rect in old_tetronimos:
+        #     screen.blit(old_tetronimo, stay_rect)
         # update the display
         pygame.display.flip()
         

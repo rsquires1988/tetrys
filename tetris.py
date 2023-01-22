@@ -4,7 +4,9 @@ from tetronimo import Tetronimo
 from typing import Dict, List
 
 def main():
-    dim = 20
+    dim = 50
+    x= dim * 10
+    y=0
     LEFT = 90
     RIGHT = -90
 
@@ -33,11 +35,11 @@ def main():
     pygame.init()
 
     # set the window size
-    size = (200, 400)
+    size = (10*dim, 20*dim)
     screen = pygame.display.set_mode(size)
 
     # set the title of the window
-    pygame.display.set_caption("Tetris")
+    pygame.display.set_caption("Tetrys")
 
     # set the color of the background
     bg_color = (175, 175, 175)
@@ -47,7 +49,7 @@ def main():
     # tetronimo_dict = create_tetronimos()
     old_tetronimos = []
     
-    falling_tetronimo = Tetronimo()
+    falling_tetronimo = Tetronimo(x, y, dim)
     initial_rect = falling_tetronimo.surface.get_rect()
     move_rect = initial_rect
 
@@ -82,7 +84,7 @@ def main():
                     move_rect.bottom = screen.get_height()                                      # move it back onto the play area
                     stay_rect = move_rect                                                       # save the position it was in when it collided
                     old_tetronimos.append((falling_tetronimo.surface, stay_rect))               # and add it to a list of placed tetronimos
-                    falling_tetronimo = Tetronimo()                                             # get the next random tetronimo
+                    falling_tetronimo = Tetronimo(x,y,dim)                                             # get the next random tetronimo
                     move_rect = falling_tetronimo.surface.get_rect()                            # and its bounding rectangle
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:                                                  # if left arrow is pressed down

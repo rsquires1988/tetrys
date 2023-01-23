@@ -4,13 +4,6 @@ from textwrap import dedent
 from tet_data import tets
 from typing import Tuple, List, Dict
 
-# class TetSprite(pygame.sprite.Sprite):
-#     def __init__(self, tet, group):
-#         super(pygame.sprite.Sprite, self).__init__()
-#         # self.tetronimo = tet
-#         self._Sprite__g = group
-#         self.rect = tet.get_rect()
-
 placed_group = pygame.sprite.Group()
 falling_group = pygame.sprite.Group()
 
@@ -18,23 +11,23 @@ class Tetronimo(pygame.sprite.Sprite):
     def __init__(self, x: int, y: int, dim: int) -> type:
         super().__init__()
         falling_group.add(self)
-        self.group = falling_group
-        self.name = self.get_random(list(tets(x, y, dim)))
-        self.size: Tuple[int] = tets(x, y, dim)[self.name]["size"]
-        self.color: Tuple[int] = tets(x, y, dim)[self.name]["color"]
-        self.shape: List[Tuple[int]] = tets(x, y, dim)[self.name]["shape"]
-        self.image = self.get_surface(dim)
+        self.dim = dim
+        # self.group = falling_group
+        self.name = self.get_random(list(tets(x, y, self.dim)))
+        self.size: Tuple[int] = tets(x, y, self.dim)[self.name]["size"]
+        self.color: Tuple[int] = tets(x, y, self.dim)[self.name]["color"]
+        self.shape: List[Tuple[int]] = tets(x, y, self.dim)[self.name]["shape"]
+        self.image = self.get_surface()
         self.mask = self.get_mask()
         self.rect = self.image.get_rect()
-        self.center = self.get_center(self.name, dim)
-        # self.tet_sprite = TetSprite(self.surface, group)
-        # self.image = self.surface
+        self.mask_rect = self.get_mask_rect(x, y)
+        self.center = self.get_center(self.name)
 
         print(self)
 
     def __str__(self) -> str:
         return dedent(f'''
-                Group: {self.group}
+                Dim: {self.dim}
                 Name: {self.name}
                 Size: {self.size}
                 Color: {self.color}
@@ -46,10 +39,31 @@ class Tetronimo(pygame.sprite.Sprite):
                 --------
                 ''').strip()
         
-    def update(self):
-        self.group.remove(self)
-        placed_group.add(self)
-        print(placed_group)
+    def update(self, placed: bool=False, rotation: int=0):
+        if placed:
+            falling_group.remove(self)
+            placed_group.add(self)
+            
+            print(placed_group)
+        if rotation:
+            # falling_group.remove(self)
+            if self.name == "box":
+                pass
+            else:
+                self.image = pygame.transform.rotate(self.image, rotation)
+            # new_image = pygame.Surface(self.size, pygame.SRCALPHA)
+            # new_image.draw(falling_group, self.rect)
+            self.mask = self.get_mask()
+            # self.mask = pygame.mask.rotate(self.mask, direction)
+            # self.image = new_image
+            # falling_group.add(self)
+        
+        # self.mask.x = self.rect.x
+        # self.mask.y = self.rect.y
+        location = self.rect.x, self.rect.y
+        print(f"Location: {location}")
+        return location
+        # outline = self.mask.outline()
 
 
     def get_random(self, tets: List[int]) -> str:
@@ -57,9 +71,9 @@ class Tetronimo(pygame.sprite.Sprite):
         tetronimo_choice = random.choice(tets)
         return tetronimo_choice
     
-    def create_block(self, block_color: Tuple[int], dim: int) -> pygame.Surface:
+    def create_block(self, block_color: Tuple[int]) -> pygame.Surface:
         '''Makes block surface the same size as the block itself'''
-        square = (dim, dim)
+        square = (self.dim, self.dim)
         block_surface = pygame.Surface(square)
         block_surface.fill(block_color)
         
@@ -69,15 +83,15 @@ class Tetronimo(pygame.sprite.Sprite):
         
         # paint the block surface, make the block Rect, and draw on the shadow and border
         block_rect = block_surface.get_rect()
-        pygame.draw.rect(block_surface, desaturated_block_color, block_rect, width=dim//6)
+        pygame.draw.rect(block_surface, desaturated_block_color, block_rect, width=self.dim//6)
         pygame.draw.rect(block_surface, (127,127,127), block_rect, width=1)
         
         return block_surface
     
-    def get_surface(self, dim: int) -> pygame.Surface:
+    def get_surface(self) -> pygame.Surface:
         tetronimo_surface = pygame.Surface(self.size, pygame.SRCALPHA)
         # tetronimo_surface.fill((200,200,200,255))
-        block_surface = self.create_block(self.color, dim)
+        block_surface = self.create_block(self.color)
             
         # draw the block Surfaces onto the tetronimo Surface
         for placement in self.shape:
@@ -85,21 +99,35 @@ class Tetronimo(pygame.sprite.Sprite):
             
         return tetronimo_surface
         
-    def get_mask(self) -> pygame.Mask:
+    def get_mask(self, image=None) -> pygame.Mask:
         return pygame.mask.from_surface(self.image)
+        # return pygame.mask.from_surface(image) if image else pygame.mask.from_surface(self.image)
     
-    def get_center(self, name: str, dim: int) -> Tuple[int]:
-        return (dim*2,dim) if name == "box" else self.rect.center
+    def get_mask_rect(self, top=0, left=0):
+        rect_list = self.mask.get_bounding_rects()
+        mask_rect_union = rect_list[0].unionall(rect_list)  # I don't like this
+        mask_rect_union.move_ip(top, left)
+        return mask_rect_union
     
-    def rotation(self, direction):
-        if self.name == "box":
-            # TODO: should rotate the hitbox? I guess? Still not sure why I did this beyond "that's how they do it in the real tetris"
-            pass
-        else:
-            self.image = pygame.transform.rotate(self.image, direction)
-            # self.rect = self.image.get_rect()
+    def get_center(self, name: str) -> Tuple[int]:
+        return (self.dim*2, self.dim) if name == "box" else self.rect.center
+    
+    # def rotate(self, direction):
+    #     if self.name == "box":
+    #         # TODO: should rotate the hitbox? I guess? Still not sure why I did this beyond "that's how they do it in the real tetris"
+    #         # self.image = pygame.transform.rotate(self.image, direction)
+    #         pass
+    #     else:
+    #         self.image = pygame.transform.rotate(self.image, direction)
+    #         # self.image = self.get_surface(self.dim)
+    #         # self.get_mask()
+    #     # outline = self.mask.outline()
+    #     # pygame.draw.polygon(self.image, (255,255,255), outline)
+    #         # self.rect = self.image.get_rect()
             
     def move(self, x, y):
         self.rect.x += x
         self.rect.y += y
+
+
     

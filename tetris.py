@@ -6,15 +6,15 @@ from tetronimo import Tetronimo, falling_group, placed_group
 #       Bumps left and right to settle tets
 #       Bump too much and everything gets jumbled
 
-placed_masks = []
+# placed_masks = []
     
 def get_placed_mask(top=0, left=0):
     placed_rects = [sprite.rect for sprite in placed_group]
     placed_union = placed_rects[0].unionall(placed_rects[1:])
     placed_surface = pygame.Surface((placed_union.width, placed_union.height), pygame.SRCALPHA)
-    placed_masks = [sprite.mask for sprite in placed_group]
+    #placed_masks = [sprite.mask for sprite in placed_group]
 
-    return placed_masks, (placed_union.left, placed_union.top), placed_union, placed_surface
+    return (placed_union.left, placed_union.top), placed_union, placed_surface#, placed_masks
 
 def print_placed(call_loc, placed_mask, x, y, placed_union_rect, placed_surface, tet_left_corner, tet_top_corner):
     print("-----TET PLACED-----")
@@ -27,7 +27,7 @@ def print_placed(call_loc, placed_mask, x, y, placed_union_rect, placed_surface,
     print("Tet top-left corner: (", tet_left_corner, ",", tet_top_corner,")")
 
 def main():
-    dim = 10
+    dim = 30
     x=0
     y=0
     LEFT = 90
@@ -76,22 +76,18 @@ def main():
 
                 if not bits_mask == falling_tet.mask.overlap_area(pygame.mask.from_surface(screen), (-offset_x, -offset_y)):
                     falling_tet.update(move=(0, -dim), placed=True)
-                    placed_masks, pmloc, placed_rects, placed_surface = get_placed_mask()
+                    pmloc, placed_rects, placed_surface = get_placed_mask()
                     call_loc = "wall"
-                    print_placed(call_loc, placed_masks, pmloc[0], pmloc[1], placed_rects, placed_surface, offset_x, offset_y)
-                    # screen.blit(placed_surface, (0,0))
+                    print_placed(call_loc, [sprite.mask for sprite in placed_group], pmloc[0], pmloc[1], placed_rects, placed_surface, offset_x, offset_y)
                     falling_tet = Tetronimo(x,y,dim)
                 elif placed_rects:
-                    for sprite in placed_group:#for mask in placed_masks:
-                        # NOTE: They're only colliding with their own sprites, not any sprite, and rotations seem to break it as well, still got some offset weirdness
-                        tet_overlaps_placed = bits_mask == falling_tet.mask.overlap_area(sprite.mask, (sprite.rect.left - offset_x, sprite.rect.top - offset_y - dim))
-                        if tet_overlaps_placed:
-                            falling_tet.update(move=(0, -dim), placed=True)
-                            placed_masks, pmloc, placed_rects, placed_surface = get_placed_mask()
-                            call_loc="tet"
-                            print_placed(call_loc, placed_masks, pmloc[0], pmloc[1], placed_rects, placed_surface, offset_x, offset_y)
-                            falling_tet = Tetronimo(x,y,dim)
-                            break
+                    collision_sprites = pygame.sprite.spritecollide(falling_tet, placed_group, False, pygame.sprite.collide_mask)
+                    if len(collision_sprites) > 0:
+                        falling_tet.update(move=(0, -dim), placed=True)
+                        pmloc, placed_rects, placed_surface = get_placed_mask()
+                        call_loc="tet"
+                        print_placed(call_loc, [sprite.mask for sprite in placed_group], pmloc[0], pmloc[1], placed_rects, placed_surface, offset_x, offset_y)
+                        falling_tet = Tetronimo(x,y,dim)
                     
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -126,11 +122,11 @@ def main():
         screen.fill(bg_color)
         
         # ! DEBUG: Shows masks
-        pygame.draw.polygon(falling_tet.image, (255,255,255), falling_tet.mask.outline())
+        # pygame.draw.polygon(falling_tet.image, (255,255,255), falling_tet.mask.outline())
 
-        if placed_surface:
-            for sprite in placed_group:
-                pygame.draw.polygon(sprite.image, (0,0,0), sprite.mask.outline())#all_mask.outline())
+        # if placed_surface:
+        #     for sprite in placed_group:
+        #         pygame.draw.polygon(sprite.image, (0,0,0), sprite.mask.outline())
 
         # draw falling and placed tetronimos
         falling_group.draw(screen)

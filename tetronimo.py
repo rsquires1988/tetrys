@@ -2,10 +2,11 @@ import pygame
 import random
 from textwrap import dedent
 from tet_data import tets
-from typing import Tuple, List, Dict
+from typing import Tuple, List
 
 placed_group = pygame.sprite.Group()
 falling_group = pygame.sprite.Group()
+placed_rects = []
 
 class Tetronimo(pygame.sprite.Sprite):    
     def __init__(self, x: int, y: int, dim: int) -> type:
@@ -19,7 +20,6 @@ class Tetronimo(pygame.sprite.Sprite):
         self.image = self.get_surface()
         self.mask = self.get_mask()
         self.rect = self.image.get_rect()
-        self.mask_rect = self.get_mask_rect(x, y)
         self.center = self.get_center(self.name)
 
     def __str__(self) -> str:
@@ -44,18 +44,16 @@ class Tetronimo(pygame.sprite.Sprite):
         if placed:
             falling_group.remove(self)
             placed_group.add(self)
-            
-            print(placed_group)
+            self.mask = self.get_mask()
         if rotation:
             if self.name == "box":
                 pass
             else:
                 self.image = pygame.transform.rotate(self.image, rotation)
-
             self.mask = self.get_mask()
 
         location = self.rect.x, self.rect.y
-        print(f"Location: {location}")
+
         return location
 
     def get_random(self, tets: List[int]) -> str:
@@ -82,7 +80,7 @@ class Tetronimo(pygame.sprite.Sprite):
     
     def get_surface(self) -> pygame.Surface:
         tetronimo_surface = pygame.Surface(self.size, pygame.SRCALPHA)
-        # tetronimo_surface.fill((200,200,200,255))
+        tetronimo_surface.fill((255,255,255,127))
         block_surface = self.create_block(self.color)
             
         # draw the block Surfaces onto the tetronimo Surface
@@ -93,13 +91,6 @@ class Tetronimo(pygame.sprite.Sprite):
         
     def get_mask(self) -> pygame.Mask:
         return pygame.mask.from_surface(self.image)
-        # return pygame.mask.from_surface(image) if image else pygame.mask.from_surface(self.image)
-    
-    def get_mask_rect(self, top=0, left=0):
-        rect_list = self.mask.get_bounding_rects()
-        mask_rect_union = rect_list[0].unionall(rect_list)  # I don't like this
-        mask_rect_union.move_ip(top, left)
-        return mask_rect_union
     
     def get_center(self, name: str) -> Tuple[int]:
         return (self.dim*2, self.dim) if name == "box" else self.rect.center

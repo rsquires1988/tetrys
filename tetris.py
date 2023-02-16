@@ -73,7 +73,6 @@ def main():
                 offset_x = falling_tet.rect.left
                 offset_y = falling_tet.rect.top
                 bits_mask = falling_tet.mask.count()
-
                 if not bits_mask == falling_tet.mask.overlap_area(pygame.mask.from_surface(screen), (-offset_x, -offset_y)):
                     falling_tet.update(move=(0, -dim), placed=True)
                     pmloc, placed_rects, placed_surface = get_placed_mask()
@@ -87,8 +86,7 @@ def main():
                         pmloc, placed_rects, placed_surface = get_placed_mask()
                         call_loc="tet"
                         print_placed(call_loc, [sprite.mask for sprite in placed_group], pmloc[0], pmloc[1], placed_rects, placed_surface, offset_x, offset_y)
-                        falling_tet = Tetronimo(x,y,dim)
-                    
+                        falling_tet = Tetronimo(x,y,dim)                    
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     falling_tet.update(move=(-dim,0))
@@ -97,6 +95,10 @@ def main():
                     bits_mask = falling_tet.mask.count()
                     if not bits_mask == falling_tet.mask.overlap_area(pygame.mask.from_surface(screen), (offset_x, offset_y)):
                         falling_tet.update(move=(dim,0))
+                    elif placed_rects:
+                        collision_sprites = pygame.sprite.spritecollide(falling_tet, placed_group, False, pygame.sprite.collide_mask)
+                        if len(collision_sprites) > 0:
+                            falling_tet.update(move=(dim,0))
                 if event.key == pygame.K_RIGHT:
                     falling_tet.update(move=(dim,0))
                     offset_x = -falling_tet.rect.left
@@ -104,6 +106,10 @@ def main():
                     bits_mask = falling_tet.mask.count()
                     if not bits_mask == falling_tet.mask.overlap_area(pygame.mask.from_surface(screen), (offset_x, offset_y)):
                         falling_tet.update(move=(-dim,0))
+                    elif placed_rects:
+                        collision_sprites = pygame.sprite.spritecollide(falling_tet, placed_group, False, pygame.sprite.collide_mask)
+                        if len(collision_sprites) > 0:
+                            falling_tet.update(move=(-dim,0))
                 if event.key == pygame.K_DOWN: 
                     interval = interval // 10 
                     pygame.time.set_timer(pygame.USEREVENT, interval)

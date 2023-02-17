@@ -21,6 +21,8 @@ class Tetronimo(pygame.sprite.Sprite):
         self.mask = self.get_mask()
         self.rect = self.image.get_rect()
         self.center = self.get_center(self.name)
+        self.count = self.mask.count()
+
 
     def __str__(self) -> str:
         return dedent(f'''

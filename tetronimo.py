@@ -82,6 +82,7 @@ class Tetronimo(pygame.sprite.Sprite):
     
     def get_surface(self) -> pygame.Surface:
         tetronimo_surface = pygame.Surface(self.size, pygame.SRCALPHA)
+        # ! DEBUG: Shows rotation boxes 
         # tetronimo_surface.fill((255,255,255,127))
         block_surface = self.create_block(self.color)
             

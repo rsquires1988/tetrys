@@ -10,7 +10,8 @@ from tetronimo import Tetronimo, falling_group, placed_group
 
 # Checks for collision between falling_tet and the edges of the screen or any tetronimos in the placed_group
 def collision(screen, falling_tet):
-    return falling_tet.count != falling_tet.mask.overlap_area(pygame.mask.from_surface(screen), (-falling_tet.rect.left, -falling_tet.rect.top)) or pygame.sprite.spritecollide(falling_tet, placed_group, False, pygame.sprite.collide_mask)
+    return falling_tet.count != falling_tet.mask.overlap_area(pygame.mask.from_surface(screen), (-falling_tet.rect.left, -falling_tet.rect.top)) or \
+        pygame.sprite.spritecollide(falling_tet, placed_group, False, pygame.sprite.collide_mask)
 
 # def get_placed_mask(top=0, left=0):
 #     # BUG: placed_rects is required to prevent an exception on first placement, and therefore must be updated whenever something is placed
@@ -65,6 +66,11 @@ def main():
     interval = base_interval                            # set a variable for a changeable interval
     pygame.time.set_timer(pygame.USEREVENT, interval)   # start a timer and attatch it to an event
     
+    rows = []
+    for i in range(dim*20-dim, 0, -dim):
+        rows.append(screen.subsurface(0, i, dim * 10, dim))
+        
+    print(rows)
     # start the main loop
     running = True
     while running:
@@ -111,7 +117,7 @@ def main():
         # ! DEBUG: Shows masks
         # pygame.draw.polygon(falling_tet.image, (255,255,255), falling_tet.mask.outline())
 
-        # if placed_surface:
+        # if placed_group:
         #     for sprite in placed_group:
         #         pygame.draw.polygon(sprite.image, (0,0,0), sprite.mask.outline())
 

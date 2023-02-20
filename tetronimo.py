@@ -6,8 +6,30 @@ from typing import Tuple, List
 
 placed_group = pygame.sprite.Group()
 falling_group = pygame.sprite.Group()
-placed_rects = []
 
+class Block(pygame.sprite.Sprite):
+    def __init__(self, color, dim):
+        super().__init__()
+        self.square = (dim, dim)
+        self.image, self.rect = self.create_block(color, dim)
+        # self.image.fill(color)
+        
+    def create_block(self, color: Tuple[int], dim) -> pygame.Surface:
+        '''Makes block surface the same size as the block itself'''
+        block_surface = pygame.Surface(self.square)
+        block_surface.fill(color)
+        
+        # get edge shadow color
+        desaturation_percent = 0.25
+        desaturated_color = [64 if n == 0 else int(n - (n * desaturation_percent)) for n in color]
+        
+        # paint the block surface, make the block Rect, and draw on the shadow and border
+        block_rect = block_surface.get_rect()
+        pygame.draw.rect(block_surface, desaturated_color, block_rect, width=dim//6)
+        pygame.draw.rect(block_surface, (127,127,127), block_rect, width=1)
+        
+        return block_surface, block_rect
+        
 class Tetronimo(pygame.sprite.Sprite):    
     def __init__(self, x: int, y: int, dim: int) -> type:
         super().__init__()
@@ -17,6 +39,7 @@ class Tetronimo(pygame.sprite.Sprite):
         self.size: Tuple[int] = tets(x, y, self.dim)[self.name]["size"]
         self.color: Tuple[int] = tets(x, y, self.dim)[self.name]["color"]
         self.shape: List[Tuple[int]] = tets(x, y, self.dim)[self.name]["shape"]
+        self.blocks = self.get_blocks()
         self.image = self.get_surface()
         self.mask = self.get_mask()
         self.rect = self.image.get_rect()
@@ -63,32 +86,22 @@ class Tetronimo(pygame.sprite.Sprite):
         tetronimo_choice = random.choice(tets)
         return tetronimo_choice
     
-    def create_block(self, block_color: Tuple[int]) -> pygame.Surface:
-        '''Makes block surface the same size as the block itself'''
-        square = (self.dim, self.dim)
-        block_surface = pygame.Surface(square)
-        block_surface.fill(block_color)
-        
-        # get edge shadow color
-        desaturation_percent = 0.25
-        desaturated_block_color = [64 if n == 0 else int(n - (n * desaturation_percent)) for n in block_color]
-        
-        # paint the block surface, make the block Rect, and draw on the shadow and border
-        block_rect = block_surface.get_rect()
-        pygame.draw.rect(block_surface, desaturated_block_color, block_rect, width=self.dim//6)
-        pygame.draw.rect(block_surface, (127,127,127), block_rect, width=1)
-        
-        return block_surface
+    def get_blocks(self):
+        blocks = []
+        for position in self.shape:
+            blocks.append(Block(self.color, self.dim))
+            blocks[-1].rect.topleft = position
+            
+        return blocks
     
     def get_surface(self) -> pygame.Surface:
         tetronimo_surface = pygame.Surface(self.size, pygame.SRCALPHA)
         # ! DEBUG: Shows rotation boxes 
         # tetronimo_surface.fill((255,255,255,127))
-        block_surface = self.create_block(self.color)
             
         # draw the block Surfaces onto the tetronimo Surface
-        for placement in self.shape:
-            tetronimo_surface.blit(block_surface, placement)
+        for block in self.blocks:
+            tetronimo_surface.blit(block.image, block.rect.topleft)
             
         return tetronimo_surface
         

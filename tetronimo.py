@@ -5,6 +5,7 @@ from tet_data import tets
 from typing import Tuple, List
 
 placed_group = pygame.sprite.Group()
+placed_blocks = pygame.sprite.Group()
 falling_group = pygame.sprite.Group()
 
 class Block(pygame.sprite.Sprite):
@@ -30,7 +31,7 @@ class Block(pygame.sprite.Sprite):
         
         return block_surface, block_rect
         
-class Tetronimo(pygame.sprite.Sprite):    
+class Tetronimo(pygame.sprite.Sprite):#pygame.sprite.Group):    
     def __init__(self, x: int, y: int, dim: int) -> type:
         super().__init__()
         falling_group.add(self)
@@ -45,7 +46,6 @@ class Tetronimo(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.center = self.get_center(self.name)
         self.count = self.mask.count()
-
 
     def __str__(self) -> str:
         return dedent(f'''
@@ -69,6 +69,7 @@ class Tetronimo(pygame.sprite.Sprite):
         if placed:
             falling_group.remove(self)
             placed_group.add(self)
+            placed_blocks.add(self.blocks)
             self.mask = self.get_mask()
         if rotation:
             if self.name == "box":

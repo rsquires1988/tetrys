@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 import pygame
-from tetronimo import Tetronimo, falling_group, placed_group
-
-# Idea: Pinball tetris, allow partial rotations, gravity affects a tet after collision or table bump
-#       Bumps left and right to settle tets
-#       Bump too much and everything gets jumbled
+from tetronimo import Tetronimo, falling_group, placed_group, placed_blocks
 
 # placed_masks = []
 
@@ -100,10 +96,10 @@ def main():
                     if collision(screen, falling_tet):
                         falling_tet.update(move=(0,-dim), placed=True)
                         falling_tet = Tetronimo(x,y,dim)
-                if event.key == pygame.K_d:
+                if event.key == pygame.K_s:
                     falling_tet.update(rotation=LEFT)
                     # kick stuff goes here
-                if event.key == pygame.K_f:
+                if event.key == pygame.K_d:
                     falling_tet.update(rotation=RIGHT)
                     # kick stuff goes here
             elif event.type == pygame.KEYUP:
@@ -111,6 +107,9 @@ def main():
                     interval = base_interval
                     pygame.time.set_timer(pygame.USEREVENT, interval)
 
+        # for i, row in enumerate(rows, 0):
+        #     ? if block count * 10 != row.count
+        #         print(f"Row {i} has 10 blocks")
         # clear the screen
         screen.fill(bg_color)
         
